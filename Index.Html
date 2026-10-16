@@ -1,0 +1,139 @@
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova Dashboard</title>
+<style>
+:root{--bg:#080d18;--panel:#111a2b;--panel2:#17243a;--text:#edf4ff;--muted:#91a2bd;--accent:#69e0ff;--line:#273650;--good:#72e6b1}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at top right,#15294a 0,#080d18 45%);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);min-height:100vh}
+button,input{font:inherit}
+.wrap{max-width:900px;margin:auto;padding:20px 14px 44px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:20px;letter-spacing:.4px}
+.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#65e0ff,#8c78ff);display:grid;place-items:center;color:#07101c;font-weight:900}
+.pill{border:1px solid var(--line);color:var(--muted);padding:7px 11px;border-radius:999px;font-size:12px}
+.hero,.card{background:linear-gradient(145deg,rgba(22,35,57,.96),rgba(13,21,36,.96));border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 16px 40px #0002}
+.hero{margin-bottom:16px}
+.eyebrow{color:var(--accent);font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+h1{font-size:clamp(25px,5vw,36px);margin:8px 0}
+p{color:var(--muted);line-height:1.6;margin:6px 0}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.tab{background:#111a2b;border:1px solid var(--line);border-radius:13px;color:var(--muted);padding:12px 6px;cursor:pointer;font-weight:700}
+.tab.active{background:#18354a;border-color:var(--accent);color:var(--accent)}
+.card{margin-bottom:14px}
+h2{font-size:19px;margin:0 0 6px}
+label{display:block;font-size:13px;color:#c2cee0;margin:14px 0 6px}
+input{width:100%;padding:12px 13px;border:1px solid #344763;background:#091220;color:var(--text);border-radius:11px;outline:none}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #69e0ff18}
+.btn{border:0;border-radius:11px;padding:12px 15px;background:linear-gradient(100deg,#68def8,#9c91ff);color:#07101c;font-weight:800;cursor:pointer;margin-top:14px}
+.btn.secondary{background:#1b2a41;color:var(--text);border:1px solid var(--line)}
+.btn.danger{background:#4a2030;color:#ffdbe4;border:1px solid #7e354b}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.note{font-size:12px;background:#241f18;border:1px solid #57452b;color:#f0d8a6;border-radius:12px;padding:12px;line-height:1.5;margin-top:14px}
+.hidden{display:none!important}
+.profile-top{display:flex;align-items:center;gap:13px;margin:12px 0 16px}
+.avatar{width:58px;height:58px;border-radius:18px;background:#213a57;display:grid;place-items:center;font-size:25px}
+.stat{border:1px solid var(--line);border-radius:13px;padding:12px;background:#0c1524}
+.stat small{color:var(--muted);display:block}.stat strong{display:block;margin-top:4px}
+footer{text-align:center;color:#71839e;font-size:12px;padding:12px}
+@media(max-width:560px){.row{grid-template-columns:1fr}.wrap{padding:14px 10px 30px}.hero,.card{padding:16px}.brand{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="brand"><div class="logo">N</div><span>NOVA DASHBOARD</span></div><span class="pill">PERSONAL SPACE</span></header>
+<section class="hero">
+  <div class="eyebrow">Your space · Your settings</div>
+  <h1 id="welcome">স্বাগতম!</h1>
+  <p>এক জায়গা থেকে নিজের প্রোফাইল ও সেটিংস পরিচালনা করো।</p>
+</section>
+
+<section id="lock" class="card">
+  <h2>🔐 পাসওয়ার্ড লক</h2>
+  <p id="lockText">প্রথমবার হলে নতুন পাসওয়ার্ড তৈরি করো। পরে একই পাসওয়ার্ড দিয়ে খুলতে পারবে।</p>
+  <label for="pass">পাসওয়ার্ড</label><input id="pass" type="password" autocomplete="current-password" placeholder="পাসওয়ার্ড লিখো">
+  <button class="btn" id="unlockBtn">চালু / আনলক</button>
+  <div class="note">গুরুত্বপূর্ণ: এটি শুধু ব্রাউজারে চলা ডেমো লক। পাসওয়ার্ড এই ডিভাইসের browser storage-এ থাকে; এটি নিরাপদ সার্ভার-ভিত্তিক লগইন নয়। আসল গোপন তথ্য এখানে রেখো না।</div>
+</section>
+
+<div id="app" class="hidden">
+<nav class="tabs" aria-label="Main menu">
+  <button class="tab active" data-tab="settings">⚙️ সেটিংস</button>
+  <button class="tab" data-tab="profile">👤 প্রোফাইল</button>
+  <button class="tab" data-tab="menu">☰ মেনু</button>
+</nav>
+
+<section id="settings" class="card panel">
+  <h2>⚙️ সেটিংস</h2><p>ড্যাশবোর্ডের ব্যক্তিগত পছন্দ বদলাও।</p>
+  <label for="themeName">ড্যাশবোর্ডের নাম</label><input id="themeName" placeholder="যেমন: Nova Dashboard">
+  <label for="newPass">পাসওয়ার্ড পরিবর্তন</label><input id="newPass" type="password" placeholder="নতুন পাসওয়ার্ড (ঐচ্ছিক)">
+  <button class="btn" id="saveSettings">সেটিংস সেভ করো</button>
+  <button class="btn secondary" id="lockBtn">লক করো</button>
+</section>
+
+<section id="profile" class="card panel hidden">
+  <h2>👤 আমার প্রোফাইল</h2>
+  <div class="profile-top"><div class="avatar">👤</div><div><strong id="profileName">তোমার নাম</strong><p>প্রোফাইল তথ্য</p></div></div>
+  <label for="name">নাম</label><input id="name" placeholder="তোমার নাম">
+  <label for="email">ইমেইল অ্যাড্রেস</label><input id="email" type="email" placeholder="name@example.com">
+  <label for="telegram">Telegram ইউজারনেম</label><input id="telegram" placeholder="@username">
+  <button class="btn" id="saveProfile">প্রোফাইল সেভ করো</button>
+  <div class="note">এখানে দেওয়া তথ্য এই ব্রাউজারের ডিভাইসেই সেভ হবে; কোনো সার্ভারে পাঠানো হয় না।</div>
+</section>
+
+<section id="menu" class="card panel hidden">
+  <h2>☰ মেনু</h2><p>তোমার ড্যাশবোর্ডের দ্রুত অপশন।</p>
+  <div class="row">
+    <div class="stat"><small>অ্যাকাউন্ট</small><strong>ব্যক্তিগত প্রোফাইল</strong></div>
+    <div class="stat"><small>স্টোরেজ</small><strong>এই ব্রাউজার</strong></div>
+  </div>
+  <button class="btn secondary" id="goProfile">প্রোফাইল খুলুন</button>
+  <button class="btn danger" id="clearData">লোকাল তথ্য মুছুন</button>
+  <p style="font-size:12px;margin-top:12px">লোকাল তথ্য মুছলে সংরক্ষিত নাম, ইমেইল, Telegram নাম ও ডেমো পাসওয়ার্ড মুছে যাবে।</p>
+</section>
+</div>
+<footer>Nova Dashboard · Single-file HTML demo</footer>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const KEY='novaDashboardDemo_v1';
+let data={};
+try{data=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){data={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data));return true}catch(e){alert('এই ব্রাউজারে তথ্য সেভ করা যাচ্ছে না।');return false}}
+function showApp(){ $('lock').classList.add('hidden');$('app').classList.remove('hidden');render(); }
+function render(){
+  $('name').value=data.name||'';$('email').value=data.email||'';$('telegram').value=data.telegram||'';
+  $('themeName').value=data.dashboardName||'Nova Dashboard';
+  $('profileName').textContent=data.name||'তোমার নাম';
+  $('welcome').textContent='স্বাগতম, '+(data.name||'বন্ধু')+'!';
+  document.title=data.dashboardName||'Nova Dashboard';
+}
+$('unlockBtn').addEventListener('click',()=>{
+ const p=$('pass').value;
+ if(!p){alert('পাসওয়ার্ড লিখো।');return}
+ if(!data.password){data.password=p;save();$('pass').value='';showApp();alert('ডেমো পাসওয়ার্ড তৈরি হয়েছে।');}
+ else if(p===data.password){$('pass').value='';showApp();}
+ else alert('পাসওয়ার্ড মিলছে না।');
+});
+$('pass').addEventListener('keydown',e=>{if(e.key==='Enter')$('unlockBtn').click()});
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{
+ document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b===btn));
+ document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('hidden',p.id!==btn.dataset.tab));
+}));
+$('saveProfile').addEventListener('click',()=>{data.name=$('name').value.trim();data.email=$('email').value.trim();data.telegram=$('telegram').value.trim();if(save()){render();alert('প্রোফাইল সেভ হয়েছে।')}});
+$('saveSettings').addEventListener('click',()=>{data.dashboardName=$('themeName').value.trim()||'Nova Dashboard';if($('newPass').value){data.password=$('newPass').value;$('newPass').value=''}if(save()){render();alert('সেটিংস সেভ হয়েছে।')}});
+$('lockBtn').addEventListener('click',()=>{$('app').classList.add('hidden');$('lock').classList.remove('hidden');$('pass').value='';$('lockText').textContent='আনলক করতে তোমার পাসওয়ার্ড লিখো।';});
+$('goProfile').addEventListener('click',()=>document.querySelector('[data-tab="profile"]').click());
+$('clearData').addEventListener('click',()=>{if(confirm('সব লোকাল তথ্য মুছে ফেলবে?')){localStorage.removeItem(KEY);data={};location.reload()}});
+if(data.password){$('lockText').textContent='ড্যাশবোর্ড খুলতে তোমার পাসওয়ার্ড লিখো।';$('unlockBtn').textContent='আনলক করো'}
+</script>
+</body>
+</html>'''
+
+path = Path("/mnt/data/nova_dashboard.html")
+path.write_text(html, encoding="utf-8")
+print(f"HTML ফাইল তৈরি হয়েছে: {path}")
